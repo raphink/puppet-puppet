@@ -47,4 +47,8 @@ class puppet::client::base {
     "$agent/diff_args":     value => '-u';
   }
 
+  puppet::config {
+    "$agent/factsync":      ensure => 'absent';
+    "$agent/environments":  ensure => 'absent';
+  }
 }

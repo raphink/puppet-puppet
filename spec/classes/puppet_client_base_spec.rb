@@ -37,6 +37,9 @@ describe 'puppet::client::base' do
       it { should contain_puppet__config("#{agent}/pidfile").with_value('/var/run/puppet/puppetd.pid') }
       it { should contain_puppet__config("#{agent}/environment").with_value('someuser') }
       it { should contain_puppet__config("#{agent}/diff_args").with_value('-u') }
+
+      it { should_not contain_puppet__config("#{agent}/factsync") }
+      it { should_not contain_puppet__config("#{agent}/environments") }
     end
   end
 end
