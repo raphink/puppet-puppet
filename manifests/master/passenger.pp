@@ -73,7 +73,7 @@ class puppet::master::passenger inherits puppet::master {
     group   => 'root',
     require => [
       File["${rack_location}/public"],
-      Apache::Vhost-ssl['puppetmasterd']],
+      Apache::Vhost::Ssl['puppetmasterd']],
     notify  => Exec['apache-graceful'],
   }
 
