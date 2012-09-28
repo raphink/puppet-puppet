@@ -20,13 +20,17 @@ class puppet::client::cron {
     content => template('puppet/launch-puppet.erb'),
   }
 
+  $seed = fqdn_rand(30)
+  $minute_1 = $seed
+  $minute_2 = $seed + 30
+
   cron {'puppetd':
     ensure      => present,
     command     => '/usr/local/bin/launch-puppet',
     user        => 'root',
     environment => 'MAILTO=root',
     minute      => $puppet_run_minutes ? {
-      ''        => ip_to_cron(2),
+      ''        => [$minute_1, $minute_2],
       '*'       => undef,
       default   => $puppet_run_minutes,
     },
