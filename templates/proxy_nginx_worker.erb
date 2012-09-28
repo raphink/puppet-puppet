@@ -1,0 +1,10 @@
+<% unless @comment.nil? -%>
+#<%= comment %>
+<%- end -%>
+upstream <%= @backend_name %> {
+<%- if @fair -%>  fair; <%- end %>
+<% @ports.each do |port| -%>
+  server <%= @backend %>:<%= port %>;
+<%- end -%>
+}
+

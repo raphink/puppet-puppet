@@ -1,0 +1,3 @@
+location ~ <%= @location %> {
+  proxy_pass     http://<%= @backend_name %>;
+}
