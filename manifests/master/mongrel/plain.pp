@@ -19,7 +19,8 @@ class puppet::master::mongrel::plain {
   augeas { "configure puppetmaster standalone mongrel":
     context => $context,
     changes => "set ${opts_key} '\"--confdir=/srv/puppetmaster/stable --ssl_client_header=HTTP_X_CLIENT_DN --ssl_client_verify_header=HTTP_X_CLIENT_VERIFY --bindaddress=0.0.0.0\"'",
-    notify => Service["puppetmaster"],
+    notify  => Service["puppetmaster"],
+    require => Augeas['configure puppetmaster startup variables'],
   }
 
 }
