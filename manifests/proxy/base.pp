@@ -53,10 +53,24 @@ class puppet::proxy::base {
     group  => 'root',
   }
 
+  case $::osfamily {
+    'Debian': {
+      $default_context = '/files/etc/default/puppetmaster'
+      $default_setting_name = 'DAEMON_OPTS'
+      }
+
+    'RedHat': {
+      $default_context = '/files/etc/sysconfig/puppetmaster'
+      $default_setting_name = 'PUPPETMASTER_EXTRA_OPTS'
+      }
+
+    default: { fail("Unknown OS family: ${::osfamily}") }
+  }
+
   augeas { 'configure puppetmaster CA daemon':
-    context => '/files/etc/default/puppetmaster',
+    context => $default_context,
     changes => [
-      "set DAEMON_OPTS '\"--ssldir=${ca_root} --certname=${certname} --ssl_client_header=HTTP_X_CLIENT_DN --ssl_client_verify_header=HTTP_X_CLIENT_VERIFY --bindaddress=127.0.0.1\"'",
+      "set ${default_setting_name} '\"--ssldir=${ca_root} --certname=${certname} --ssl_client_header=HTTP_X_CLIENT_DN --ssl_client_verify_header=HTTP_X_CLIENT_VERIFY --bindaddress=127.0.0.1\"'",
     ],
     notify => Service['puppetmaster'],
   }
