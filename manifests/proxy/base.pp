@@ -47,6 +47,12 @@ class puppet::proxy::base {
 ',
   }
 
+  file {$ca_root:
+    ensure => directory,
+    owner  => 'puppet',
+    group  => 'root',
+  }
+
   augeas { 'configure puppetmaster CA daemon':
     context => '/files/etc/default/puppetmaster',
     changes => [
