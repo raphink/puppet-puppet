@@ -6,7 +6,7 @@ class puppet::proxy::base {
   $certname = $puppet_server
 
   include nginx
-  include puppet::master::mongrel::standalone
+  include puppet::master::mongrel::plain
   include concat::setup
 
   package { 'mcollective-agent-puppetca': ensure => present }
@@ -65,14 +65,6 @@ class puppet::proxy::base {
       }
 
     default: { fail("Unknown OS family: ${::osfamily}") }
-  }
-
-  augeas { 'configure puppetmaster CA daemon':
-    context => $default_context,
-    changes => [
-      "set ${default_setting_name} '\"--ssldir=${ca_root} --certname=${certname} --ssl_client_header=HTTP_X_CLIENT_DN --ssl_client_verify_header=HTTP_X_CLIENT_VERIFY --bindaddress=127.0.0.1\"'",
-    ],
-    notify => Service['puppetmaster'],
   }
 
 # TODO:
