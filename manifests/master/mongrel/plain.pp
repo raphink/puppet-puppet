@@ -1,7 +1,8 @@
 class puppet::master::mongrel::plain inherits puppet::master::mongrel::standalone {
-
   # TODO: use a class parameter
-  $puppetmaster_default_path = '/srv/puppetmaster/stable/puppetmaster'
+  if (!$puppetmaster_default_path) {
+    fail('You must provide a value for $puppetmaster_default_path')
+  }
 
   case $::osfamily {
     /Debian|kFreeBSD/: {
