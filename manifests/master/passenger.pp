@@ -22,10 +22,6 @@ class puppet::master::passenger inherits puppet::master {
     $rack_version = '1.0.0'
   }
 
-  if ( ! $activerecord_version ) {
-    $activerecord_version = '2.3.2'
-  }
-
   # Increase apache's default timeout. If puppetmaster needs more time to
   # compile the catalog, it will fail with a "Broken pipe" error and inflict a
   # high load on the server.
@@ -75,12 +71,6 @@ class puppet::master::passenger inherits puppet::master {
       File["${rack_location}/public"],
       Apache::Vhost::Ssl['puppetmasterd']],
     notify  => Exec['apache-graceful'],
-  }
-
-  package {'activerecord':
-    ensure   => $activerecord_version,
-    provider => 'gem',
-    require  => Package['ruby-dev'],
   }
 
   package {'rack':
