@@ -19,6 +19,16 @@ class puppet::master {
     package {'ruby-rdoc': ensure => present }
   }
 
+  if $::operatingsystem =~ /Debian|Ubuntu/ {
+    package { 'libactiverecord-ruby': ensure => present }
+  } else {
+    package {'activerecord':
+      ensure   => present,
+      provider => 'gem',
+      require  => Package['ruby-dev'],
+    }
+  }
+
   if (versioncmp($::puppetversion, 2) > 0) {
     $master = 'master'
   } else {
