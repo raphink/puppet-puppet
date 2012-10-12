@@ -53,20 +53,6 @@ class puppet::proxy::base {
     group  => 'root',
   }
 
-  case $::osfamily {
-    'Debian': {
-      $default_context = '/files/etc/default/puppetmaster'
-      $default_setting_name = 'DAEMON_OPTS'
-      }
-
-    'RedHat': {
-      $default_context = '/files/etc/sysconfig/puppetmaster'
-      $default_setting_name = 'PUPPETMASTER_EXTRA_OPTS'
-      }
-
-    default: { fail("Unknown OS family: ${::osfamily}") }
-  }
-
 # TODO:
 # - CA certs
 # - protect traffic to puppetmaster backends (unicorn/passenger + https ?)
