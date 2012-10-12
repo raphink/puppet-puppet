@@ -59,7 +59,10 @@ class puppet::proxy::base {
 # - prevent direct access to static files
 # - reduce mongrels to 1
 
-  puppet::config { 'puppetca/ssldir': value => $ca_root }
+  puppet::config {
+    'puppetca/ssldir': value => $ca_root;
+    'master/certname': value => $certname;
+  }
 
   # Workers
   concat {'/etc/nginx/puppet-sslproxy/workers.conf':
