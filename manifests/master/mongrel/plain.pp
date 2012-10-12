@@ -34,6 +34,13 @@ class puppet::master::mongrel::plain inherits puppet::master::mongrel::standalon
   puppet::config {
     'master/ssl_client_header':        value => 'HTTP_X_CLIENT_DN';
     'master/ssl_client_verify_header': value => 'HTTP_X_CLIENT_VERIFY';
+    # TODO: put this in a class param/hiera
+    # Note: mongrel will fail to start if this value is the same than on the
+    # client !
+    'master/ssldir': value => $ca_root ? {
+      default => $ca_root,
+      '' => '/var/lib/puppet/ssl',
+    };
   }
 
   Augeas['configure puppetmaster startup variables'] {
