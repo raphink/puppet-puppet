@@ -48,13 +48,14 @@ class puppet::master {
       }
 
       puppet::config {
-        "${master}/dbadapter":    value => 'mysql';
-        "${master}/storeconfigs": value => true;
-        "${master}/dbmigrate":    value => true;
-        "${master}/dbserver":     value => $puppetdbhost;
-        "${master}/dbname":       value => $puppetdbname;
-        "${master}/dbuser":       value => $puppetdbuser;
-        "${master}/dbpassword":   value => $puppetdbpw;
+        "${master}/dbadapter":     value => 'mysql';
+        "${master}/storeconfigs":  value => true;
+        "${master}/dbmigrate":     value => true;
+        "${master}/dbserver":      value => $puppetdbhost;
+        "${master}/dbname":        value => $puppetdbname;
+        "${master}/dbuser":        value => $puppetdbuser;
+        "${master}/dbpassword":    value => $puppetdbpw;
+        "${master}/dbconnections": value => $puppetdbconnections;
       }
     }
 
