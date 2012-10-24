@@ -2,9 +2,42 @@ class puppet::master::mongrel::standalone inherits puppet::master {
 
   # TODO: make mongrel count configurable
 
-  $mongrel = $::operatingsystem ? {
-    /Debian|Ubuntu|kFreeBSD/ => 'mongrel',
-    /RedHat|CentOS|Fedora/   => 'rubygem-mongrel',
+  # TODO:
+  #   - Create puppet::master::standalone as a generic class
+  #   - Create puppet::master::standalone::mongrel and puppet::master::standalone::thin
+
+  case $::operatingsystem {
+    /Debian|Ubuntu|kFreeBSD/: {
+      case $::lsbdistcodename {
+        'wheezy': {
+          $mongrel = 'thin'
+
+          file {'/etc/init.d/puppetmaster':
+            ensure => present,
+            owner  => 'root',
+            group  => 'root',
+            mode   => '0755',
+            source => 'puppet:///modules/puppet/puppetmaster_thin.init',
+          }
+        }
+
+        default: {
+          $mongrel = 'mongrel'
+        }
+      }
+
+      exec {'Use ruby1.8':
+        command => 'update-alternatives --set ruby /usr/bin/ruby1.8 || true',
+      }
+    }
+
+    /RedHat|CentOS|Fedora/: {
+      $mongrel = 'rubygem-mongrel'
+    }
+
+    default: {
+      fail "Unknown operating system ${::operatingsystem}"
+    }
   }
 
   package {'mongrel':
