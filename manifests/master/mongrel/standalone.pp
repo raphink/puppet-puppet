@@ -28,6 +28,7 @@ class puppet::master::mongrel::standalone inherits puppet::master {
 
       exec {'Use ruby1.8':
         command => 'update-alternatives --set ruby /usr/bin/ruby1.8 || true',
+        unless  => 'test $(readlink /etc/alternatives/ruby) = /usr/bin/ruby1.8',
       }
     }
 
