@@ -42,11 +42,6 @@ class puppet::master {
         /RedHat|CentOS|Fedora/ => 'ruby-mysql',
       }
 
-      package {'ruby-mysql':
-        ensure => present,
-        name   => $mysql,
-      }
-
       puppet::config {
         "${master}/dbadapter":     value => 'mysql';
         "${master}/storeconfigs":  value => true;
@@ -57,6 +52,35 @@ class puppet::master {
         "${master}/dbpassword":    value => $puppetdbpw;
         "${master}/dbconnections": value => $puppetdbconnections;
       }
+
+      package {'ruby-mysql':
+        ensure => present,
+        name   => $mysql,
+      }
+    }
+
+    'mysql2': {
+
+      puppet::config {
+        "${master}/dbadapter":     value => 'mysql2';
+        "${master}/storeconfigs":  value => true;
+        "${master}/dbmigrate":     value => true;
+        "${master}/dbserver":      value => $puppetdbhost;
+        "${master}/dbname":        value => $puppetdbname;
+        "${master}/dbuser":        value => $puppetdbuser;
+        "${master}/dbpassword":    value => $puppetdbpw;
+        "${master}/dbconnections": value => $puppetdbconnections;
+      }
+
+      package {
+        'mysql-devel':
+          ensure => present;
+
+        'mysql2':
+          ensure   => present,
+          provider => 'gem',
+          require  => Package['mysql-devel'];
+      }      
     }
 
     'sqlite': {
