@@ -1,36 +1,28 @@
 class puppet::master::standalone::plain inherits puppet::master::standalone {
 
   $server_type = $puppet::master::standalone::server_type
+  $base_port = $puppet::master::standalone::base_port
+  $_puppetmasters = $puppet::master::standalone::_puppetmasters
 
   case $::osfamily {
     /Debian|kFreeBSD/: {
-      $context  = '/files/etc/default/puppetmaster' 
-      $opts_key = 'DAEMON_OPTS'
+      $context = '/files/etc/default/puppetmaster'
+      $changes = [
+        "set PORT ${base_port}",
+        'set START yes',
+        "set SERVERTYPE ${server_type}",
+        "set PUPPETMASTERS ${_puppetmasters}",
+        "set DAEMON_OPTS '\"--bindaddress=0.0.0.0\"'",
+      ]
     }
 
     'RedHat': {
-      $context  = '/files/etc/sysconfig/puppetmaster' 
-      $opts_key = 'PUPPETMASTER_EXTRA_OPTS'
+      $sysconfig_extra_opts = '--bindaddress=0.0.0.0'
+      $context = '/files/etc/sysconfig/puppetmaster'
+      $changes = template('puppet/sysconfig_puppetmaster_redhat.erb')
     }
 
     default: { fail("Unknown OS family ${::osfamily}") }
-  }
-
-  $changes = $::operatingsystem ? {
-    /Debian|Ubuntu|kFreeBSD/ => [
-      'set PORT 18140',
-      'set START yes',
-      "set SERVERTYPE ${server_type}",
-      'set PUPPETMASTERS 4',
-      "set DAEMON_OPTS '\"--bindaddress=0.0.0.0\"'",
-    ],
-    /RedHat|CentOS|Fedora/ => [
-      'set PUPPETMASTER_PORTS/1 18140',
-      'set PUPPETMASTER_PORTS/2 18141',
-      'set PUPPETMASTER_PORTS/3 18142',
-      'set PUPPETMASTER_PORTS/4 18143',
-      "set PUPPETMASTER_EXTRA_OPTS '\"--bindaddress=0.0.0.0\"'",
-    ],
   }
 
   puppet::config {

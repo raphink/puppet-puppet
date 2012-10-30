@@ -1,6 +1,13 @@
 class puppet::master::standalone {
   include puppet::master
 
+  $_puppetmasters = $puppetmasters ? {
+    ''      => '4',
+    default => $puppetmasters,
+  }
+
+  $base_port = 18140
+
   case $::lsbdistcodename {
     'wheezy': {
       $server_type = 'thin'
@@ -30,22 +37,17 @@ class puppet::master::standalone {
     /Debian|kFreeBSD/: {
       $context = '/files/etc/default/puppetmaster'
       $changes = [
-        'set PORT 18140',
+        "set PORT ${base_port}",
         'set START yes',
         "set SERVERTYPE ${server_type}",
-        'set PUPPETMASTERS 4',
+        "set PUPPETMASTERS ${_puppetmasters}",
       ]
     }
 
     'RedHat': {
+      $sysconfig_extra_opts = "--servertype=${server_type}"
       $context = '/files/etc/sysconfig/puppetmaster'
-      $changes = [
-        "set PUPPETMASTER_EXTRA_OPTS '\"--servertype=${server_type}\"'",
-        'set PUPPETMASTER_PORTS/1 18140',
-        'set PUPPETMASTER_PORTS/2 18141',
-        'set PUPPETMASTER_PORTS/3 18142',
-        'set PUPPETMASTER_PORTS/4 18143',
-      ]
+      $changes = template('puppet/sysconfig_puppetmaster_redhat.erb')
     }
 
     default: { fail("Unknown OS family ${::osfamily}") }
