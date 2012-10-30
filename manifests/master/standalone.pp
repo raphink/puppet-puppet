@@ -11,11 +11,13 @@ class puppet::master::standalone {
   case $::lsbdistcodename {
     'wheezy': {
       $server_type = 'thin'
+      $hasstatus = false
       include puppet::master::standalone::thin
     }
 
     default: {
       $server_type = 'mongrel'
+      $hasstatus = true
       include puppet::master::standalone::mongrel
     }
   }
@@ -29,7 +31,7 @@ class puppet::master::standalone {
 
   service {'puppetmaster':
     ensure    => running,
-    hasstatus => true,
+    hasstatus => $hasstatus,
     enable    => true,
   }
 
