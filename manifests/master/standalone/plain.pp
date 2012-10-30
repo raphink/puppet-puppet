@@ -7,19 +7,13 @@ class puppet::master::standalone::plain inherits puppet::master::standalone {
   case $::osfamily {
     /Debian|kFreeBSD/: {
       $context = '/files/etc/default/puppetmaster'
-      $changes = [
-        "set PORT ${base_port}",
-        'set START yes',
-        "set SERVERTYPE ${server_type}",
-        "set PUPPETMASTERS ${_puppetmasters}",
-        "set DAEMON_OPTS '\"--bindaddress=0.0.0.0\"'",
-      ]
+      $changes_opts = 'set DAEMON_OPTS \'"--bindaddress=0.0.0.0"\''
     }
 
     'RedHat': {
       $sysconfig_extra_opts = '--bindaddress=0.0.0.0'
       $context = '/files/etc/sysconfig/puppetmaster'
-      $changes = template('puppet/sysconfig_puppetmaster_redhat.erb')
+      $changes_opts = 'set PUPPETMASTER_EXTRA_OPTS \'"--bindaddress=0.0.0.0"\''
     }
 
     default: { fail("Unknown OS family ${::osfamily}") }
@@ -38,8 +32,8 @@ class puppet::master::standalone::plain inherits puppet::master::standalone {
       };
   }
 
-  Augeas['configure puppetmaster startup variables'] {
-    changes => $changes,
+  Augeas['configure puppetmaster options'] {
+    changes => $changes_opts,
   }
 
 }

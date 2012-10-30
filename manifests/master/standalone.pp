@@ -36,26 +36,33 @@ class puppet::master::standalone {
   case $::osfamily {
     /Debian|kFreeBSD/: {
       $context = '/files/etc/default/puppetmaster'
-      $changes = [
+      $changes_workers = [
         "set PORT ${base_port}",
         'set START yes',
         "set SERVERTYPE ${server_type}",
         "set PUPPETMASTERS ${_puppetmasters}",
       ]
+      $changes_opts = 'rm DAEMON_OPTS'
     }
 
     'RedHat': {
-      $sysconfig_extra_opts = "--servertype=${server_type}"
       $context = '/files/etc/sysconfig/puppetmaster'
-      $changes = template('puppet/sysconfig_puppetmaster_redhat.erb')
+      $changes_workers = template('puppet/sysconfig_puppetmaster_redhat.erb')
+      $changes_opts = "set PUPPETMASTER_EXTRA_OPTS \'\"--servertype=${server_type}"
     }
 
     default: { fail("Unknown OS family ${::osfamily}") }
   }
 
-  augeas {'configure puppetmaster startup variables':
+  augeas {'configure puppetmaster workers':
     context => $context,
-    changes => $changes,
+    changes => $changes_workers,
+    notify  => Service['puppetmaster'],
+  }
+
+  augeas {'configure puppetmaster options':
+    context => $context,
+    changes => $changes_opts,
     notify  => Service['puppetmaster'],
   }
 }

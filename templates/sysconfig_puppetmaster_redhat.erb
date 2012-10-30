@@ -3,7 +3,6 @@ vars=Array.new
 for i in 0..(@_puppetmasters.to_i()-1)
   vars << ("set PUPPETMASTER_PORTS/" << (i+1).to_s() << " " << (@base_port.to_i()+i).to_s());
 end
-vars << "set PUPPETMASTER_EXTRA_OPTS \'\""+@sysconfig_extra_opts+"\"\'"
 vars << "rm PUPPETMASTER_PORTS"
 %>
 <%= vars %>
