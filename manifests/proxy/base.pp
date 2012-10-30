@@ -6,7 +6,7 @@ class puppet::proxy::base {
   $certname = $puppet_server
 
   include nginx
-  include puppet::master::mongrel::plain
+  include puppet::master::standalone::plain
   include concat::setup
 
   package { 'mcollective-agent-puppetca': ensure => present }
