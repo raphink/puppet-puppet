@@ -6,6 +6,21 @@ class puppet::master::standalone {
     default => $puppetmasters,
   }
 
+  $backend_name = $puppetmaster_backend_name ? {
+    ''      => 'puppetmaster-legacy',
+    default => $puppetmaster_backend_name,
+  }
+
+  $backend_fair = $puppetmaster_backend_fair ? {
+    ''      => false,
+    default => $puppetmaster_backend_fair,
+  }
+
+  $backend_ip = $puppetmaster_backend_ip ? {
+    ''      => $::ipaddress,
+    default => $puppetmaster_backend_ip,
+  }
+
   $base_port = 18140
 
   case $::lsbdistcodename {
@@ -67,4 +82,12 @@ class puppet::master::standalone {
     changes => $changes_opts,
     notify  => Service['puppetmaster'],
   }
+
+  # Exported for proxy
+  @@concat::fragment { "puppet_proxy_worker_${backend_name}":
+    ensure  => present,
+    target  => '/etc/nginx/puppet-sslproxy/workers.conf',
+    content => template('puppet/proxy_nginx_worker.erb'),
+  }
+
 }

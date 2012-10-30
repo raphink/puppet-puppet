@@ -2,8 +2,11 @@ class puppet::proxy::base {
 
   # TODO: use parameters/hiera
   $ca_root = '/srv/puppetca'
-  $default_backend = 'puppetmaster-legacy'
   $certname = $puppet_server
+
+  $puppetmaster_backend_name = 'puppetmaster-ca'
+  $puppetmaster_backend_ip = '127.0.0.1'
+  $puppetmasters = 1
 
   include nginx
   include puppet::master::standalone::plain
@@ -70,15 +73,4 @@ class puppet::proxy::base {
   concat {'/etc/nginx/puppet-sslproxy/routing.conf':
     notify  => Service['nginx'],
   }
-
-  # Default route
-  $location = '.*'
-  $backend_name = $default_backend
-  concat::fragment {'puppet_proxy_route_default':
-    ensure  => present,
-    order   => '99',
-    target  => '/etc/nginx/puppet-sslproxy/routing.conf',
-    content => template('puppet/proxy_nginx_route.erb'),
-  }
-
 }
