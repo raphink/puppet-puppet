@@ -1,8 +1,8 @@
 <%
 vars=Array.new
-for i in 0..(@_puppetmasters.to_i()-1)
-  vars << ("set PUPPETMASTER_PORTS/" << (i+1).to_s() << " " << (@base_port.to_i()+i).to_s());
-end
 vars << "rm PUPPETMASTER_PORTS"
+for i in 0..(@_puppetmasters.to_i()-1)
+  vars << ("set PUPPETMASTER_PORTS/" + (i+1).to_s() + " " + (@base_port.to_i()+i).to_s());
+end
 %>
-<%= vars %>
+<%= vars.join("@") %>

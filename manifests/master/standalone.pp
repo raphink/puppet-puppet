@@ -47,7 +47,7 @@ class puppet::master::standalone {
 
     'RedHat': {
       $context = '/files/etc/sysconfig/puppetmaster'
-      $changes_workers = template('puppet/sysconfig_puppetmaster_redhat.erb')
+      $changes_workers = split(template('puppet/sysconfig_puppetmaster_redhat.erb'), '@')
       $changes_opts = "set PUPPETMASTER_EXTRA_OPTS \'\"--servertype=${server_type}"
     }
 
