@@ -1,4 +1,6 @@
-class puppet::master::mongrel::plain inherits puppet::master::mongrel::standalone {
+class puppet::master::standalone::plain inherits puppet::master::standalone {
+
+  $server_type = $puppet::master::standalone::server_type
 
   case $::osfamily {
     /Debian|kFreeBSD/: {
@@ -18,7 +20,7 @@ class puppet::master::mongrel::plain inherits puppet::master::mongrel::standalon
     /Debian|Ubuntu|kFreeBSD/ => [
       'set PORT 18140',
       'set START yes',
-      'set SERVERTYPE mongrel',
+      "set SERVERTYPE ${server_type}",
       'set PUPPETMASTERS 4',
       "set DAEMON_OPTS '\"--bindaddress=0.0.0.0\"'",
     ],
@@ -37,10 +39,11 @@ class puppet::master::mongrel::plain inherits puppet::master::mongrel::standalon
     # TODO: put this in a class param/hiera
     # Note: mongrel will fail to start if this value is the same than on the
     # client !
-    'master/ssldir': value => $ca_root ? {
-      default => $ca_root,
-      '' => '/var/lib/puppet/ssl',
-    };
+    'master/ssldir':
+      value   => $ca_root ? {
+        default => $ca_root,
+        '' => '/var/lib/puppet/ssl',
+      };
   }
 
   Augeas['configure puppetmaster startup variables'] {
