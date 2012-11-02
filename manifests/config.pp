@@ -25,7 +25,8 @@ define puppet::config (
   }
 
   augeas {"set puppet config parameter '${name}' to '${value}'":
-    context => '/files/etc/puppet/puppet.conf',
+    incl    => '/etc/puppet/puppet.conf',
+    lens    => 'Puppet.lns',
     changes => $changes,
     require => Package['puppet'],
   }
