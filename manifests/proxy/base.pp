@@ -1,4 +1,4 @@
-class puppet::proxy::base {
+class puppet::proxy::base inherits puppet::master::standalone::plain {
 
   # TODO: use parameters/hiera
   $ca_root = '/srv/puppetca'
@@ -6,7 +6,6 @@ class puppet::proxy::base {
   $certname = $puppet_server
 
   include nginx
-  include puppet::master::standalone::plain
   include concat::setup
 
   package { 'mcollective-agent-puppetca': ensure => present }
@@ -59,7 +58,27 @@ class puppet::proxy::base {
 # - prevent direct access to static files
 # - reduce mongrels to 1
 
-  puppet::config { 'master/certname': value => $certname }
+  $ssldir = $ca_root ? {
+    default => $ca_root,
+    ''      => '/var/lib/puppet/ssl',
+  }
+
+  puppet::config {
+    'puppetca/ssldir':   value => $ssldir;
+    'puppetca/certname': value => $certname;
+  }
+
+  Puppet::Config['master/ca'] {
+    value => true,
+  }
+
+  Puppet::Config['master/certname'] {
+    value => $certname,
+  }
+
+  Puppet::Config['master/ssldir'] {
+    value => $ssldir,
+  }
 
   # Workers
   concat {'/etc/nginx/puppet-sslproxy/workers.conf':
