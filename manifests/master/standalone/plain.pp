@@ -1,40 +1,70 @@
-class puppet::master::standalone::plain inherits puppet::master::standalone {
+class puppet::master::standalone::plain (
+  $puppetmasters = '4',
+  $backend_name = 'puppetmaster-legacy',
+  $backend_fair = false,
+  $backend_ip = $::ipaddress,
+  $base_port = '18140',
+  $dbadapter = 'mysql',
+  $dbhost = 'localhost',
+  $dbname = 'puppet',
+  $dbuser = 'puppet',
+  $dbpassword = 'puppet',
+  $dbconnections = '20',
+  $ca = false,
+  $certname = '',
+  $ssldir = '',
+) {
 
-  $server_type = $puppet::master::standalone::server_type
-  $base_port = $puppet::master::standalone::base_port
-  $_puppetmasters = $puppet::master::standalone::_puppetmasters
+  validate_re($::osfamily, ['Debian', 'kFreeBSD', 'RedHat'],
+                  "Unsupported OS family ${::osfamily}")
 
-  case $::osfamily {
-    /Debian|kFreeBSD/: {
-      $context = '/files/etc/default/puppetmaster'
-      $changes_opts = 'set DAEMON_OPTS \'"--bindaddress=0.0.0.0"\''
-    }
+  validate_re($puppetmasters, '\d+', 'puppetmasters must be an integer')
+  validate_re($base_port, '\d+', 'base_port must be an integer')
+  validate_bool($backend_fair)
+  validate_string($backend_name, 'backend_name must be a string')
 
-    'RedHat': {
-      $sysconfig_extra_opts = '--bindaddress=0.0.0.0'
-      $context = '/files/etc/sysconfig/puppetmaster'
-      $changes_opts = 'set PUPPETMASTER_EXTRA_OPTS \'"--bindaddress=0.0.0.0"\''
-    }
+  $daemon_opts = $::osfamily ? {
+    /Debian|kFreeBSD/ => 'set DAEMON_OPTS \'"--bindaddress=0.0.0.0"\'',
+    'RedHat'          => 'set PUPPETMASTER_EXTRA_OPTS \'"--bindaddress=0.0.0.0"\'',
+    default           => '',
+  }
 
-    default: { fail("Unknown OS family ${::osfamily}") }
+  $certname_ensure = $certname ? {
+    ''      => absent,
+    default => present,
+  }
+
+  $ssldir_ensure = $ssldir ? {
+    ''      => absent,
+    default => present,
   }
 
   puppet::config {
     'master/ssl_client_header':        value => 'HTTP_X_CLIENT_DN';
     'master/ssl_client_verify_header': value => 'HTTP_X_CLIENT_VERIFY';
-    # TODO: put this in a class param/hiera
-    # Note: mongrel will fail to start if this value is the same than on the
-    # client !
     'master/ssldir':
-      ensure => absent;
+      ensure => $ssldir_ensure,
+      value  => $ssldir;
     'master/certname':
-      ensure => absent;
+      ensure => $certname_ensure,
+      value  => $certname;
     'master/ca':
-      value  => false;
+      value  => $ca;
   }
 
-  Augeas['configure puppetmaster options'] {
-    changes => $changes_opts,
+  class {'::puppet::master::standalone':
+    puppetmasters  => $puppetmasters,
+    backend_name   => $backend_name,
+    backend_fair   => $backend_fair,
+    backend_ip     => $backend_ip,
+    base_port      => $base_port,
+    daemon_options => $daemon_opts,
+    dbadapter      => $dbadapter,
+    dbhost         => $dbhost,
+    dbname         => $dbname,
+    dbuser         => $dbuser,
+    dbpassword     => $dbpassword,
+    dbconnections  => $dbconnections,
   }
 
 }

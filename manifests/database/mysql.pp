@@ -1,6 +1,10 @@
-class puppet::database::mysql {
+class puppet::database::mysql (
+  $dbname = 'puppet',
+  $dbuser = 'puppet',
+  $dbpassword = 'puppet',
+) {
 
-  include mysql::server
+  include ::mysql::server
 
   mysql::database {'puppet':
     ensure => present,
@@ -8,9 +12,9 @@ class puppet::database::mysql {
 
   mysql::rights {'Set rights for puppet database':
     host     => '%', #TODO: allow only puppetmasters.
-    database => $puppetdbname,
-    user     => $puppetdbuser,
-    password => $puppetdbpw,
+    database => $dbname,
+    user     => $dbuser,
+    password => $dbpassword,
   }
 
 }
