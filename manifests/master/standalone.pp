@@ -1,6 +1,6 @@
 class puppet::master::standalone (
   $puppetmasters = '4',
-  $backend_name = 'puppetmaster-legacy',
+  $backend_name = 'puppetmaster-default',
   $backend_fair = false,
   $backend_ip = $::ipaddress,
   $base_port = '18140',
