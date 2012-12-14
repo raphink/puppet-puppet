@@ -26,10 +26,11 @@ class puppet::master::standalone::plain inherits puppet::master::standalone {
     # Note: mongrel will fail to start if this value is the same than on the
     # client !
     'master/ssldir':
-      value   => $ca_root ? {
-        default => $ca_root,
-        '' => '/var/lib/puppet/ssl',
-      };
+      ensure => absent;
+    'master/certname':
+      ensure => absent;
+    'master/ca':
+      value  => false;
   }
 
   Augeas['configure puppetmaster options'] {
