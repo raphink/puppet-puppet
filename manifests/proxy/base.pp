@@ -4,6 +4,7 @@ class puppet::proxy::base (
   $backend_name = 'puppetmaster-ca',
   $backend_ip = '127.0.0.1',
   $puppetmasters = '1',
+  $worker = true,
 ) {
 
   validate_re($::osfamily, ['Debian', 'kFreeBSD', 'RedHat'],
@@ -75,13 +76,15 @@ class puppet::proxy::base (
     'puppetca/certname': value => $certname;
   }
 
-  class {'::puppet::master::standalone::plain':
-    puppetmasters => $puppetmasters,
-    backend_name  => $backend_name,
-    backend_ip    => $backend_ip,
-    ca            => true,
-    certname      => $certname,
-    ssldir        => $ssldir,
+  if $worker {
+    class {'::puppet::master::standalone::plain':
+      puppetmasters => $puppetmasters,
+      backend_name  => $backend_name,
+      backend_ip    => $backend_ip,
+      ca            => true,
+      certname      => $certname,
+      ssldir        => $ssldir,
+    }
   }
 
   # Workers
