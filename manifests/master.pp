@@ -1,4 +1,11 @@
-class puppet::master {
+class puppet::master (
+  $dbadapter = 'mysql',
+  $dbhost = 'localhost',
+  $dbname = 'puppet',
+  $dbuser = 'puppet',
+  $dbpassword = 'puppet',
+  $dbconnections = '20',
+) {
 
   $puppetmaster_pkg = $::operatingsystem ? {
     /Debian|Ubuntu/        => 'puppetmaster',
@@ -35,7 +42,7 @@ class puppet::master {
     $master = 'puppetmasterd'
   }
 
-  case $puppetdbtype {
+  case $dbadapter {
     'mysql': {
       $mysql = $::operatingsystem ? {
         /Debian|Ubuntu/        => 'libdbd-mysql-ruby',
@@ -46,11 +53,11 @@ class puppet::master {
         "${master}/dbadapter":     value => 'mysql';
         "${master}/storeconfigs":  value => true;
         "${master}/dbmigrate":     value => true;
-        "${master}/dbserver":      value => $puppetdbhost;
-        "${master}/dbname":        value => $puppetdbname;
-        "${master}/dbuser":        value => $puppetdbuser;
-        "${master}/dbpassword":    value => $puppetdbpw;
-        "${master}/dbconnections": value => $puppetdbconnections;
+        "${master}/dbserver":      value => $dbhost;
+        "${master}/dbname":        value => $dbname;
+        "${master}/dbuser":        value => $dbuser;
+        "${master}/dbpassword":    value => $dbpassword;
+        "${master}/dbconnections": value => $dbconnections;
       }
 
       package {'ruby-mysql':
@@ -65,11 +72,11 @@ class puppet::master {
         "${master}/dbadapter":     value => 'mysql2';
         "${master}/storeconfigs":  value => true;
         "${master}/dbmigrate":     value => true;
-        "${master}/dbserver":      value => $puppetdbhost;
-        "${master}/dbname":        value => $puppetdbname;
-        "${master}/dbuser":        value => $puppetdbuser;
-        "${master}/dbpassword":    value => $puppetdbpw;
-        "${master}/dbconnections": value => $puppetdbconnections;
+        "${master}/dbserver":      value => $dbhost;
+        "${master}/dbname":        value => $dbname;
+        "${master}/dbuser":        value => $dbuser;
+        "${master}/dbpassword":    value => $dbpassword;
+        "${master}/dbconnections": value => $dbconnections;
       }
 
       package {
@@ -92,10 +99,10 @@ class puppet::master {
         "${master}/dbadapter":    value => 'sqlite3';
         "${master}/storeconfigs": value => true;
         "${master}/dbmigrate":    value => true;
-        "${master}/dbserver":     value => $puppetdbhost;
-        "${master}/dbname":       value => $puppetdbname;
-        "${master}/dbuser":       value => $puppetdbuser;
-        "${master}/dbpassword":   value => $puppetdbpw;
+        "${master}/dbserver":     value => $dbhost;
+        "${master}/dbname":       value => $dbname;
+        "${master}/dbuser":       value => $dbuser;
+        "${master}/dbpassword":   value => $dbpassword;
       }
     }
 

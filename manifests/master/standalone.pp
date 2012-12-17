@@ -1,24 +1,45 @@
-class puppet::master::standalone {
-  include puppet::master
+class puppet::master::standalone (
+  $puppetmasters = '4',
+  $backend_name = 'puppetmaster-default',
+  $backend_fair = false,
+  $backend_ip = $::ipaddress,
+  $base_port = '18140',
+  $daemon_options = '',
+  $dbadapter = 'mysql',
+  $dbhost = 'localhost',
+  $dbname = 'puppet',
+  $dbuser = 'puppet',
+  $dbpassword = 'puppet',
+  $dbconnections = '20',
+) {
 
-  $_puppetmasters = $puppetmasters ? {
-    ''      => '4',
-    default => $puppetmasters,
+  class {'::puppet::master':
+    dbadapter      => $dbadapter,
+    dbhost         => $dbhost,
+    dbname         => $dbname,
+    dbuser         => $dbuser,
+    dbpassword     => $dbpassword,
+    dbconnections  => $dbconnections,
   }
 
-  $base_port = 18140
+  validate_re($::osfamily, ['Debian', 'kFreeBSD', 'RedHat'],
+                  "Unsupported OS family ${::osfamily}")
+
+  validate_re($puppetmasters, '\d+', 'puppetmasters must be an integer')
+  validate_re($base_port, '\d+', 'base_port must be an integer')
+  validate_bool($backend_fair)
 
   case $::lsbdistcodename {
     'wheezy': {
       $server_type = 'thin'
       $hasstatus = false
-      include puppet::master::standalone::thin
+      include ::puppet::master::standalone::thin
     }
 
     default: {
       $server_type = 'mongrel'
       $hasstatus = true
-      include puppet::master::standalone::mongrel
+      include ::puppet::master::standalone::mongrel
     }
   }
 
@@ -42,7 +63,7 @@ class puppet::master::standalone {
         "set PORT ${base_port}",
         'set START yes',
         "set SERVERTYPE ${server_type}",
-        "set PUPPETMASTERS ${_puppetmasters}",
+        "set PUPPETMASTERS ${puppetmasters}",
       ]
       $changes_opts = 'rm DAEMON_OPTS'
     }
@@ -62,9 +83,22 @@ class puppet::master::standalone {
     notify  => Service['puppetmaster'],
   }
 
+  $_changes_opts = $daemon_options ? {
+    ''      => $changes_opts,
+    default => $daemon_options,
+  }
+
   augeas {'configure puppetmaster options':
     context => $context,
-    changes => $changes_opts,
+    changes => $_changes_opts,
     notify  => Service['puppetmaster'],
   }
+
+  # Exported for proxy
+  @@concat::fragment { "puppet_proxy_worker_${backend_name}":
+    ensure  => present,
+    target  => '/etc/nginx/puppet-sslproxy/workers.conf',
+    content => template('puppet/proxy_nginx_worker.erb'),
+  }
+
 }

@@ -1,12 +1,20 @@
-class puppet::proxy::base inherits puppet::master::standalone::plain {
+class puppet::proxy::base (
+  $ca_root = '/srv/puppetca',
+  $certname = $::fqdn,
+  $backend_name = 'puppetmaster-ca',
+  $backend_ip = '127.0.0.1',
+  $puppetmasters = '1',
+  $worker = true,
+) {
 
-  # TODO: use parameters/hiera
-  $ca_root = '/srv/puppetca'
-  $default_backend = 'puppetmaster-legacy'
-  $certname = $puppet_server
+  validate_re($::osfamily, ['Debian', 'kFreeBSD', 'RedHat'],
+                  "Unsupported OS family ${::osfamily}")
 
-  include nginx
-  include concat::setup
+  validate_re($puppetmasters, '\d+', 'puppetmasters must be an integer')
+  validate_string($backend_name, 'backend_name must be a string')
+
+  include ::nginx
+  include ::concat::setup
 
   package { 'mcollective-agent-puppetca': ensure => present }
 
@@ -68,16 +76,15 @@ class puppet::proxy::base inherits puppet::master::standalone::plain {
     'puppetca/certname': value => $certname;
   }
 
-  Puppet::Config['master/ca'] {
-    value => true,
-  }
-
-  Puppet::Config['master/certname'] {
-    value => $certname,
-  }
-
-  Puppet::Config['master/ssldir'] {
-    value => $ssldir,
+  if $worker {
+    class {'::puppet::master::standalone::plain':
+      puppetmasters => $puppetmasters,
+      backend_name  => $backend_name,
+      backend_ip    => $backend_ip,
+      ca            => true,
+      certname      => $certname,
+      ssldir        => $ssldir,
+    }
   }
 
   # Workers
@@ -89,15 +96,4 @@ class puppet::proxy::base inherits puppet::master::standalone::plain {
   concat {'/etc/nginx/puppet-sslproxy/routing.conf':
     notify  => Service['nginx'],
   }
-
-  # Default route
-  $location = '.*'
-  $backend_name = $default_backend
-  concat::fragment {'puppet_proxy_route_default':
-    ensure  => present,
-    order   => '99',
-    target  => '/etc/nginx/puppet-sslproxy/routing.conf',
-    content => template('puppet/proxy_nginx_route.erb'),
-  }
-
 }

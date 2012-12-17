@@ -2,9 +2,9 @@
 #<%= comment %>
 <%- end -%>
 upstream <%= @backend_name %> {
-<%- if @fair -%>  fair; <%- end %>
-<% @ports.each do |port| -%>
-  server <%= @backend %>:<%= port %>;
+<%- if @backend_fair -%>  fair; <%- end %>
+<% for i in 0..(@puppetmasters.to_i()-1) -%>
+  server <%= @backend_ip %>:<%= (@base_port.to_i()+i).to_s() %>;
 <%- end -%>
 }
 
