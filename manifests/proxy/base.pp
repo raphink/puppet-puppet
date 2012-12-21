@@ -71,11 +71,6 @@ class puppet::proxy::base (
     ''      => '/var/lib/puppet/ssl',
   }
 
-  puppet::config {
-    'master/ssldir':   value => $ssldir;
-    'master/certname': value => $certname;
-  }
-
   if $worker {
     class {'::puppet::master::standalone::plain':
       puppetmasters => $puppetmasters,
