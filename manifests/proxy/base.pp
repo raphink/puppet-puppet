@@ -72,8 +72,8 @@ class puppet::proxy::base (
   }
 
   puppet::config {
-    'puppetca/ssldir':   value => $ssldir;
-    'puppetca/certname': value => $certname;
+    'master/ssldir':   value => $ssldir;
+    'master/certname': value => $certname;
   }
 
   if $worker {
