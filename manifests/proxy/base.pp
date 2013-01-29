@@ -16,7 +16,9 @@ class puppet::proxy::base (
   include ::nginx
   include ::concat::setup
 
-  package { 'mcollective-agent-puppetca': ensure => present }
+  mcollective::plugin { 'puppetca':
+    ensure => present,
+  }
 
   nginx::site { 'puppetmaster':
     conf_source => 'puppet/proxy_nginx.conf.erb',
