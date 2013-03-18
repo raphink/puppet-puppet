@@ -33,6 +33,13 @@ class puppet::client::base {
     $agent = 'puppetd'
   }
 
+  file {'/var/run/puppet/':
+    ensure => directory,
+    owner  => 'puppet',
+    group  => 'puppet',
+    mode   => '1755',
+  }
+
   puppet::config {
     'main/ssldir':          value => '/var/lib/puppet/ssl';
     "$agent/server":        value => $puppet_server;
